@@ -16,18 +16,23 @@ class ItemRepository extends BaseRepository
 	public function browse($request)
 	{
 		try{
-			$this->query= \DB::select("SELECT items.id, items.nama, jsonb_agg(json_build_object(
-				'id', taxes.id,
-				'nama' , taxes.nama,
-			  	'rate', taxes.rate
-			)) 
-			AS pajak FROM items
-		  	INNER JOIN taxes ON taxes.item_id = items.id GROUP BY items.id");
+			// $this->query= \DB::select("SELECT items.id, items.nama, jsonb_agg(json_build_object(
+			// 	'id', taxes.id,
+			// 	'nama' , taxes.nama,
+			//   	'rate', taxes.rate
+			// )) 
+			// AS pajak FROM items
+		  	// INNER JOIN taxes ON taxes.item_id = items.id GROUP BY items.id");
 			
-			return response()->json([
-				'success' => true,
-				'data' => $this->pagination($request),
-			], 200);
+			// return response()->json([
+			// 	'success' => true,
+			// 	'data' => $this->pagination($request),
+			// ], 200);
+
+			$this->query = $this->getModel()->with(['tax']);
+			$this->applyCriteria(new SearchCriteria($request));
+
+			return $this->renderCollection($request);
 
 		}catch (\Exception $e) {
 			return response()->json([
